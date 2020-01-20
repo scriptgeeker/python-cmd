@@ -4,11 +4,10 @@
 
 import requests
 from bs4 import BeautifulSoup
-import lxml
 
 url = input('URL:')
 
-path = r'C:\Users\BenQ\Downloads'
+dir = r'C:\Users\BenQ\Downloads'
 
 # 访问伪装
 user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -25,14 +24,15 @@ title, label, content = '', '', ''
 soup = BeautifulSoup(response.text, 'lxml')
 
 # 获取内容
-title = soup.select('h2#activity-name')[0].get_text()
-label = soup.select('a#js_name')[0].get_text()
+title += soup.select('h2#activity-name')[0].get_text()
+label += soup.select('a#js_name')[0].get_text()
 
 for ele in soup.select('div#js_content')[0].children:
-    try:
-        content = content + ele.get_text() + '\n'
-    except Exception as e:
-        continue
+    if hasattr(ele, 'get_text'):
+        content += ele.get_text()
+    elif hasattr(ele, 'string'):
+        content += ele.string
+    content = content + '\n'
 
 # 处理文本
 import re
@@ -44,14 +44,15 @@ content = re.sub(r'\s{2,}', '\n', content)
 # 创建目录
 import os
 
-if not os.path.exists(path):
-    os.makedirs(path)
+if not os.path.exists(dir):
+    os.makedirs(dir)
 
-file = path + '/' + '【{a}】{b}.txt'.format(a=label, b=title)
+file = '【{label}】{title}.txt'.format(label=label, title=title)
+path = os.path.join(dir, file)
 
 # 写入文件
-fw = open(file, 'w', encoding='utf8')
+fw = open(path, 'w', encoding='utf8')
 fw.write(content)
 fw.close()
 
-print(os.path.abspath(file))
+print(os.path.abspath(path))
