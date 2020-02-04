@@ -27,12 +27,13 @@ soup = BeautifulSoup(response.text, 'lxml')
 title += soup.select('h2#activity-name')[0].get_text()
 label += soup.select('a#js_name')[0].get_text()
 
-for ele in soup.select('div#js_content')[0].children:
-    if hasattr(ele, 'get_text'):
-        content += ele.get_text()
-    elif hasattr(ele, 'string'):
-        content += ele.string
-    content = content + '\n'
+for ele in soup.select('div#js_content')[0].descendants:
+    if not hasattr(ele, 'children'):
+        if hasattr(ele, 'get_text'):
+            content += ele.get_text()
+        elif hasattr(ele, 'string'):
+            content += ele.string
+        content = content + '\n'
 
 # 处理文本
 import re

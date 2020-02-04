@@ -25,14 +25,19 @@ soup = BeautifulSoup(response.text, 'lxml')
 
 # 获取内容
 title += soup.select('h1.QuestionHeader-title')[0].get_text()
-label += soup.select('span.AuthorInfo-name a')[0].get_text()
+label += soup.select('span.AuthorInfo-name')[0].get_text()
 
-for ele in soup.select('div.RichContent-inner')[0].children:
-    if hasattr(ele, 'get_text'):
-        content += ele.get_text()
-    elif hasattr(ele, 'string'):
-        content += ele.string
-    content = content + '\n'
+for ele in soup.select('div.RichContent-inner')[0].descendants:
+    if not hasattr(ele, 'children'):
+        if hasattr(ele, 'get_text'):
+            content += ele.get_text()
+        elif hasattr(ele, 'string'):
+            content += ele.string
+        content = content + '\n'
+
+# 去除样式
+if not label.find('.css') == -1:
+    label = label[:label.index('.css')]
 
 # 处理文本
 import re
